@@ -5,7 +5,7 @@ use warnings;
 
 package syntax;
 BEGIN {
-  $syntax::VERSION = '0.001';
+  $syntax::VERSION = '0.002';
 }
 
 use Data::OptList qw( mkopt );
@@ -69,7 +69,7 @@ syntax - Activate syntax extensions
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -95,9 +95,6 @@ feature to find out about possible configuration options.
 The passed in feature names are simply transformed: C<function> becomes
 L<Syntax::Feature::Function> and C<foo_bar> would become 
 C<Syntax::Feature::FooBar>.
-
-This module will also automatically enable L<strict> and L<warnings> upon
-L</import>.
 
 =head1 METHODS
 

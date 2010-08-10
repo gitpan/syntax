@@ -16,4 +16,4 @@ requires:
   Data::OptList: 0.104
   Test::More: 0.94
   namespace::clean: 0
-version: 0.001
+version: 0.002
