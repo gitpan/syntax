@@ -5,7 +5,7 @@ use warnings;
 
 package syntax;
 BEGIN {
-  $syntax::VERSION = '0.002';
+  $syntax::VERSION = '0.003';
 }
 
 use Data::OptList qw( mkopt );
@@ -23,7 +23,12 @@ sub import_into {
     for my $declaration (@$import) {
         my ($feature, $options) = @$declaration;
 
-        $class->_install_feature($feature, $into, $options);
+        $class->_install_feature(
+            $feature,
+            $into,
+            $options,
+            [@args],
+        );
     }
 
     return 1;
@@ -39,21 +44,27 @@ sub import {
 }
 
 sub _install_feature {
-    my ($class, $feature, $caller, $options) = @_;
+    my ($class, $feature, $caller, $options, $all_params) = @_;
 
     my $name =
+        join '/',
+        map ucfirst,
+        split m{/},
         join '',
         map ucfirst,
-        split /_/, $feature;
+        split qr{_}, $feature;
 
     my $file    = "Syntax/Feature/${name}.pm";
-    my $package = "Syntax::Feature::${name}";
+    my $package = $file;
+    s{ \/ }{::}xg, s{ \.pm \Z }{}xgi
+        for $package;
 
     require $file;
     return $package->install(
         into        => $caller,
         options     => $options,
         identifier  => $feature,
+        outer       => $all_params,
     );
 }
 
@@ -69,7 +80,7 @@ syntax - Activate syntax extensions
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -133,7 +144,7 @@ Robert 'phaylon' Sedlacek <rs@474.at>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2010 by Robert 'phaylon' Sedlacek.
+This software is copyright (c) 2011 by Robert 'phaylon' Sedlacek.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
