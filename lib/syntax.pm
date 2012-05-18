@@ -4,11 +4,15 @@ use warnings;
 # ABSTRACT: Activate syntax extensions
 
 package syntax;
+{
+  $syntax::VERSION = '0.004';
+}
 BEGIN {
-  $syntax::VERSION = '0.003';
+  $syntax::AUTHORITY = 'cpan:PHAYLON';
 }
 
-use Data::OptList qw( mkopt );
+use Carp                qw( carp );
+use Data::OptList 0.104 qw( mkopt );
 
 use namespace::clean;
 
@@ -32,7 +36,20 @@ sub import_into {
     }
 
     return 1;
+}
 
+sub unimport_from {
+    my ($class, $from, @args) = @_;
+
+    for my $feature (@args) {
+
+        $class->_uninstall_feature(
+            $feature,
+            $from,
+        );
+    }
+
+    return 1;
 }
 
 sub import {
@@ -43,8 +60,16 @@ sub import {
     return $class->import_into($caller, @args);
 }
 
-sub _install_feature {
-    my ($class, $feature, $caller, $options, $all_params) = @_;
+sub unimport {
+    my ($class, @args) = @_;
+
+    my $caller = caller;
+
+    return $class->unimport_from($caller, @args);
+}
+
+sub _parse_feature_name {
+    my ($class, $feature) = @_;
 
     my $name =
         join '/',
@@ -59,9 +84,33 @@ sub _install_feature {
     s{ \/ }{::}xg, s{ \.pm \Z }{}xgi
         for $package;
 
+    return $package, $file;
+}
+
+sub _uninstall_feature {
+    my ($class, $feature, $target) = @_;
+
+    my ($package, $file) = $class->_parse_feature_name($feature);
+
+    require $file;
+    unless ($package->can('uninstall')) {
+        carp "Syntax extension $package does not know how to uninstall";
+        return;
+    }
+    return $package->uninstall(
+        from        => $target,
+        identifier  => $feature,
+    );
+}
+
+sub _install_feature {
+    my ($class, $feature, $target, $options, $all_params) = @_;
+
+    my ($package, $file) = $class->_parse_feature_name($feature);
+
     require $file;
     return $package->install(
-        into        => $caller,
+        into        => $target,
         options     => $options,
         identifier  => $feature,
         outer       => $all_params,
@@ -80,7 +129,7 @@ syntax - Activate syntax extensions
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -96,15 +145,15 @@ version 0.003
 =head1 DESCRIPTION
 
 This module activates community provided syntax extensions to Perl. You pass it
-a feature name, and optionally a scalar with arguments, and the dispatching 
+a feature name, and optionally a scalar with arguments, and the dispatching
 system will load and install the extension in your package.
 
-The import arguments are parsed with L<Data::OptList>. There are no 
+The import arguments are parsed with L<Data::OptList>. There are no
 standardised options. Please consult the documentation for the specific syntax
 feature to find out about possible configuration options.
 
 The passed in feature names are simply transformed: C<function> becomes
-L<Syntax::Feature::Function> and C<foo_bar> would become 
+L<Syntax::Feature::Function> and C<foo_bar> would become
 C<Syntax::Feature::FooBar>.
 
 =head1 METHODS
@@ -123,6 +172,19 @@ handlers for the calling package.
 Same as L</import>, but performs the setup in C<$into> instead of the calling
 package.
 
+=head2 unimport
+
+    syntax->unimport( @features );
+
+This method will trigger uninstallations of the C<@features> from the
+calling package.
+
+=head2 unimport_from
+
+    syntax->unimport_from( $from, @features );
+
+Same as L</unimport>, but will uninstall the C<@features> from C<$from>.
+
 =head1 RECOMMENDED FEATURES
 
 =over
@@ -138,13 +200,18 @@ Activates functions with parameter signatures.
 L<Syntax::Feature::Function>,
 L<Devel::Declare>
 
+=head1 BUGS
+
+Please report any bugs or feature requests to bug-syntax@rt.cpan.org or through the web interface at:
+ http://rt.cpan.org/Public/Dist/Display.html?Name=syntax
+
 =head1 AUTHOR
 
 Robert 'phaylon' Sedlacek <rs@474.at>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Robert 'phaylon' Sedlacek.
+This software is copyright (c) 2012 by Robert 'phaylon' Sedlacek.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

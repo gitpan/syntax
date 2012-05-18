@@ -4,29 +4,34 @@ use warnings;
 
 
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Activate syntax extensions',
-  'AUTHOR' => 'Robert \'phaylon\' Sedlacek <rs@474.at>',
-  'BUILD_REQUIRES' => {},
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+  "ABSTRACT" => "Activate syntax extensions",
+  "AUTHOR" => "Robert 'phaylon' Sedlacek <rs\@474.at>",
+  "BUILD_REQUIRES" => {
+    "FindBin" => 0,
+    "Test::More" => "0.94"
   },
-  'DISTNAME' => 'syntax',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'syntax',
-  'PREREQ_PM' => {
-    'Data::OptList' => '0.104',
-    'Test::More' => '0.94',
-    'namespace::clean' => '0'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'VERSION' => '0.003',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "DISTNAME" => "syntax",
+  "EXE_FILES" => [],
+  "LICENSE" => "perl",
+  "NAME" => "syntax",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "Data::OptList" => "0.104",
+    "namespace::clean" => 0,
+    "strict" => 0,
+    "warnings" => 0
+  },
+  "VERSION" => "0.004",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 
